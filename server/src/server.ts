@@ -5,13 +5,13 @@
 import * as server from 'vscode-languageserver';
 import * as pattern from './accessibilityPatterns';
 
-let connection = server.createConnection(server.ProposedFeatures.all);
-let documents: server.TextDocuments = new server.TextDocuments();
+const connection = server.createConnection(server.ProposedFeatures.all);
+const documents: server.TextDocuments = new server.TextDocuments();
 let hasConfigurationCapability: boolean = false;
 let hasWorkspaceFolderCapability: boolean = false;
 
 connection.onInitialize((params: server.InitializeParams) => {
-	let capabilities = params.capabilities;
+	const capabilities = params.capabilities;
 
 	hasConfigurationCapability = !!(capabilities.workspace && !!capabilities.workspace.configuration);
 	hasWorkspaceFolderCapability = !!(capabilities.workspace && !!capabilities.workspace.workspaceFolders);
@@ -41,7 +41,7 @@ interface ServerSettings {
 
 const defaultSettings: ServerSettings = { maxNumberOfProblems: 100, semanticExclude: false };
 let globalSettings: ServerSettings = defaultSettings;
-let documentSettings: Map<string, Thenable<ServerSettings>> = new Map();
+const documentSettings: Map<string, Thenable<ServerSettings>> = new Map();
 
 connection.onDidChangeConfiguration((change) => {
 	if (hasConfigurationCapability) {
@@ -49,7 +49,6 @@ connection.onDidChangeConfiguration((change) => {
 	} else {
 		globalSettings = <ServerSettings>(change.settings.webAccessibility || defaultSettings);
 	}
-
 	documents.all().forEach(validateTextDocument);
 });
 
@@ -79,15 +78,22 @@ documents.onDidChangeContent((change) => {
 
 // Only this part is interesting.
 async function validateTextDocument(textDocument: server.TextDocument): Promise<void> {
-	let settings = await getDocumentSettings(textDocument.uri);
-	let text = textDocument.getText();
+	const settings = await getDocumentSettings(textDocument.uri);
+	const text = textDocument.getText();
 	let problems = 0;
 	let m: RegExpExecArray | null;
-	let diagnostics: server.Diagnostic[] = [];
+	const diagnostics: server.Diagnostic[] = [];
 
 	while ((m = pattern.pattern.exec(text)) && problems < settings.maxNumberOfProblems) {
 		if (m != null) {
-			let el = m[0].slice(0, 5);
+			const el = m[0].slice(0, 5);
+
+			const resultColor = await pattern.validateColor(m, text);
+			if (resultColor) {
+				problems++;
+				_diagnostics(resultColor.meta, resultColor.mess, resultColor.severity);
+			}
+
 			switch (true) {
 				// ID
 				// case (/id="/i.test(el)):
@@ -100,7 +106,7 @@ async function validateTextDocument(textDocument: server.TextDocument): Promise<
 				// Div
 				case /<div/i.test(el):
 					if (settings.semanticExclude === false) {
-						let resultDiv = await pattern.validateDiv(m);
+						const resultDiv = await pattern.validateDiv(m);
 						if (resultDiv) {
 							problems++;
 							_diagnostics(resultDiv.meta, resultDiv.mess, resultDiv.severity);
@@ -110,7 +116,7 @@ async function validateTextDocument(textDocument: server.TextDocument): Promise<
 				// Span
 				case /<span/i.test(el):
 					if (settings.semanticExclude === false) {
-						let resultSpan = await pattern.validateSpan(m);
+						const resultSpan = await pattern.validateSpan(m);
 						if (resultSpan) {
 							problems++;
 							_diagnostics(resultSpan.meta, resultSpan.mess, resultSpan.severity);
@@ -119,7 +125,7 @@ async function validateTextDocument(textDocument: server.TextDocument): Promise<
 					break;
 				// Links
 				case /<a\s/i.test(el):
-					let resultA = await pattern.validateA(m);
+					const resultA = await pattern.validateA(m);
 					if (resultA) {
 						problems++;
 						_diagnostics(resultA.meta, resultA.mess, resultA.severity);
@@ -127,15 +133,39 @@ async function validateTextDocument(textDocument: server.TextDocument): Promise<
 					break;
 				// Images
 				case /<img/i.test(el):
-					let resultImg = await pattern.validateImg(m);
+					const resultImg = await pattern.validateImg(m);
 					if (resultImg) {
 						problems++;
 						_diagnostics(resultImg.meta, resultImg.mess, resultImg.severity);
 					}
 					break;
+				// audio
+				case /<audi/i.test(el):
+					const resultAudio = await pattern.validateAudio(m);
+					if (resultAudio) {
+						problems++;
+						_diagnostics(resultAudio.meta, resultAudio.mess, resultAudio.severity);
+					}
+					break;
+				// video
+				case /<vide/i.test(el):
+					const resultVideo = await pattern.validateVideo(m);
+					if (resultVideo) {
+						problems++;
+						_diagnostics(resultVideo.meta, resultVideo.mess, resultVideo.severity);
+					}
+					break;
+				// embedded youtube
+				case /youtu/i.test(el):
+					const resultYouTubeVideo = await pattern.validateVideo(m);
+					if (resultYouTubeVideo) {
+						problems++;
+						_diagnostics(resultYouTubeVideo.meta, resultYouTubeVideo.mess, resultYouTubeVideo.severity);
+					}
+					break;
 				// input
 				case /<inpu/i.test(el):
-					let resultInput = await pattern.validateInput(m);
+					const resultInput = await pattern.validateInput(m);
 					if (resultInput) {
 						problems++;
 						_diagnostics(resultInput.meta, resultInput.mess, resultInput.severity);
@@ -144,14 +174,14 @@ async function validateTextDocument(textDocument: server.TextDocument): Promise<
 				// Head, title and meta
 				case /<head/i.test(el):
 					if (/<meta(?:.+?)viewport(?:.+?)>/i.test(m[0])) {
-						let resultMeta = await pattern.validateMeta(m);
+						const resultMeta = await pattern.validateMeta(m);
 						if (resultMeta) {
 							problems++;
 							_diagnostics(resultMeta.meta, resultMeta.mess, resultMeta.severity);
 						}
 					}
 					if (!/<title>/i.test(m[0]) || /<title>/i.test(m[0])) {
-						let resultTitle = await pattern.validateTitle(m);
+						const resultTitle = await pattern.validateTitle(m);
 						if (resultTitle) {
 							problems++;
 							_diagnostics(resultTitle.meta, resultTitle.mess, resultTitle.severity);
@@ -160,7 +190,7 @@ async function validateTextDocument(textDocument: server.TextDocument): Promise<
 					break;
 				// HTML
 				case /<html/i.test(el):
-					let resultHtml = await pattern.validateHtml(m);
+					const resultHtml = await pattern.validateHtml(m);
 					if (resultHtml) {
 						problems++;
 						_diagnostics(resultHtml.meta, resultHtml.mess, resultHtml.severity);
@@ -168,7 +198,7 @@ async function validateTextDocument(textDocument: server.TextDocument): Promise<
 					break;
 				// Tabindex
 				case /tabin/i.test(el):
-					let resultTab = await pattern.validateTab(m);
+					const resultTab = await pattern.validateTab(m);
 					if (resultTab) {
 						problems++;
 						_diagnostics(resultTab.meta, resultTab.mess, resultTab.severity);
@@ -176,7 +206,7 @@ async function validateTextDocument(textDocument: server.TextDocument): Promise<
 					break;
 				// iframe and frame
 				case /(<fram|<ifra)/i.test(el):
-					let resultFrame = await pattern.validateFrame(m);
+					const resultFrame = await pattern.validateFrame(m);
 					if (resultFrame) {
 						problems++;
 						_diagnostics(resultFrame.meta, resultFrame.mess, resultFrame.severity);

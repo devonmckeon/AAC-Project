@@ -4,19 +4,6 @@
 		{
 			"type": "npm",
 			"script": "compile",
-			"group": "build",
-			"presentation": {
-				"panel": "dedicated",
-				"reveal": "never"
-			},
-			"problemMatcher": [
-				"$tsc"
-			]
-		},
-		{
-			"type": "npm",
-			"script": "watch",
-			"isBackground": true,
 			"group": {
 				"kind": "build",
 				"isDefault": true
@@ -26,8 +13,25 @@
 				"reveal": "never"
 			},
 			"problemMatcher": [
+				"$tsc"
+			],
+			"label": "npm: compile",
+			"detail": "tsc -b"
+		},
+		{
+			"type": "npm",
+			"script": "watch",
+			"isBackground": true,
+			"group": "build",
+			"presentation": {
+				"panel": "dedicated",
+				"reveal": "never"
+			},
+			"problemMatcher": [
 				"$tsc-watch"
-			]
+			],
+			"label": "npm: watch",
+			"detail": "tsc -b -w"
 		}
 	]
 }
