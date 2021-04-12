@@ -128,40 +128,48 @@ function isInadequateContrast(color1, color2) {
 	return false;
 }
 
-// Needs to be cleaned up
-export async function validateColor(m: RegExpExecArray, text: string) {
+function getContainerColor(el) {
+	let parent;
+	while (true) {
+		parent = el.parentElement;
+		if (parent) {
+			const parentColor = parent.style.backgroundColor;
+			if (!parentColor) {
+				el = parent;
+			} else {
+				return parentColor;
+			}
+		} else {
+			return null;
+		}
+	}
+}
+
+function findEl(m, text) {
 	const doc = document.createRange().createContextualFragment(text);
 	const all = doc.querySelectorAll<HTMLElement>('*');
-
+	let el;
 	for (let i = 0, max = all.length; i < max; i++) {
-		let currEl = all[i];
-		if (currEl.outerHTML.includes(m[0].toString())) {
-			const currColor = currEl.style.color;
-			if (currColor) {
-				let foundParentColor = false;
-				let parentColor;
-				let parent;
-				while (!foundParentColor) {
-					parent = currEl.parentElement;
-					if (parent) {
-						parentColor = parent.style.backgroundColor;
-						if (!parentColor) {
-							currEl = parent;
-						} else {
-							if (parentColor) {
-								if (isInadequateContrast(currColor, parentColor)) {
-									return {
-										meta: m,
-										mess: 'Contrast between element and parent should be higher than 4.5:1',
-										severity: 1,
-									};
-								}
-								return;
-							}
-						}
-					}
-					foundParentColor = true;
-				}
+		const e = all[i];
+		if (e.outerHTML.includes(m[0].toString())) {
+			el = e;
+		}
+	}
+	return el;
+}
+
+export async function validateColor(m: RegExpExecArray, text: string) {
+	const el = findEl(m, text);
+	if (el) {
+		const color = el.style.color;
+		const containerColor = getContainerColor(el);
+		if (color && containerColor) {
+			if (isInadequateContrast(color, containerColor)) {
+				return {
+					meta: m,
+					mess: 'Contrast between element and parent should be higher than 4.5:1',
+					severity: 1,
+				};
 			}
 		}
 	}
