@@ -2,7 +2,7 @@
 	"name": "aac-web-accessibility",
 	"displayName": "AAC Web Accessibility",
 	"description": "Audit Web Accessibility issues in Visual Studio Code",
-	"version": "1.1.0",
+	"version": "1.2.0",
 	"publisher": "nbhatialin",
 	"license": "Tufts",
 	"repository": "https://github.com/devonmckeon/AAC-Project",
