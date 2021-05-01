@@ -1,16 +1,23 @@
 {
-	"name": "web-accessibility-server",
+	"name": "web-accessibility-aacproject",
 	"description": "Audit Web Accessibility issues in Visual Studio Code",
-	"author": "MaxvanderSchee",
+	"author": "AACProject",
 	"license": "MIT",
 	"version": "0.2.84",
-	"publisher": "MaxvanderSchee",
+	"publisher": "AACProject",
 	"repository": "https://github.com/mvdschee/web-accessibility",
 	"engines": {
-		"node": "*"
+		"node": "*",
+		"vscode": "^1.51.0"
 	},
 	"dependencies": {
-		"vscode-languageserver": "^4.4.2"
+		"vscode-languageserver": "^4.4.2",
+		"@types/node": "^8.10.25",
+		"@types/vscode": "^1.51.0"
 	},
-	"scripts": {}
+	"scripts": {
+		"vscode:prepublish": "npm run compile",
+		"compile": "tsc -p ./",
+		"watch": "tsc -watch -p ./"
+	}
 }

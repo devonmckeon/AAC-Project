@@ -11,7 +11,10 @@
 
 // Order based om most common types first
 import { DocumentColorRequest } from 'vscode-languageserver-protocol';
+import * as vscode from 'vscode'
 import 'jsdom-global/register';
+
+const fetch = require("node-fetch");
 
 const patterns: string[] = [
 	'<div(>|)(?:.)+?>',
@@ -27,6 +30,7 @@ const patterns: string[] = [
 	'<html(>|)(?:.)+?>',
 	'tabindex="(?:.)+?"',
 	'<(?:i|)frame (?:.|)+?>',
+	'font-size:(?:.)+?"',
 	'<([a-z]+)[^>]*(?<!/)>',
 ];
 export const pattern: RegExp = new RegExp(patterns.join('|'), 'ig');
@@ -176,7 +180,30 @@ export async function validateColor(m: RegExpExecArray, text: string) {
 }
 
 export async function validateImg(m: RegExpExecArray) {
-	// Ordered by approximate frequency of the issue
+	let imageline = m[0];
+
+	// Need to do further case handling for different ways images can be formatted,
+	// account for spacing etc
+	var imageUrl = imageline.substring(
+		imageline.lastIndexOf("src=") + 5, 
+		imageline.lastIndexOf("alt") - 2
+	);
+	let serverUrl = 'https://aac-vscode-extension.ue.r.appspot.com/verify_image?imageUrl=' + imageUrl;
+	try {
+		const response = await fetch(serverUrl, {method: 'POST'});
+		const data = await response.json();
+		const textDetected = data['TextDetected']
+		if (textDetected) {
+			return {
+				meta: m,
+				mess: 'Image containing text detected. Either replace the image, or ensure alt text contains the same words as the image',
+				severity: 3,
+			};
+	}
+	} catch (error) {
+		console.log('server error ', error)
+	}
+	
 	if (!/alt="(?:.*?[a-z].*?)"/i.test(m[0]) && !/alt=""/i.test(m[0])) {
 		return {
 			meta: m,
@@ -353,6 +380,16 @@ export async function validateFrame(m: RegExpExecArray) {
 		return {
 			meta: m,
 			mess: 'Provide a title that describes the frame\'s content [title=""]',
+			severity: 3,
+		};
+	}
+}
+
+export async function validateFontsize(m: RegExpExecArray) {
+	if (/font-size:([0-9]+)px"/i.test(m[0])) {
+		return {
+			meta: m,
+			mess: 'Please define font size in relative units, such as ems, rems, percents, or named font sizes',
 			severity: 3,
 		};
 	}

@@ -212,6 +212,14 @@ async function validateTextDocument(textDocument: server.TextDocument): Promise<
 						_diagnostics(resultFrame.meta, resultFrame.mess, resultFrame.severity);
 					}
 					break;
+				// iframe and frame
+				case /style="font-size/i.test(el):
+					const resultFont = await pattern.validateFontsize(m);
+					if (resultFont) {
+						problems++;
+						_diagnostics(resultFont.meta, resultFont.mess, resultFont.severity);
+					}
+					break;
 				default:
 					break;
 			}
