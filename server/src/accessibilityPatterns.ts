@@ -189,6 +189,7 @@ export async function validateImg(m: RegExpExecArray) {
 		imageline.lastIndexOf("alt") - 2
 	);
 	let serverUrl = 'https://aac-vscode-extension.ue.r.appspot.com/verify_image?imageUrl=' + imageUrl;
+	
 	try {
 		const response = await fetch(serverUrl, {method: 'POST'});
 		const data = await response.json();
