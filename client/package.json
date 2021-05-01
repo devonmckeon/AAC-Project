@@ -17,6 +17,8 @@
 		"vscode-languageclient": "^4.4.2"
 	},
 	"devDependencies": {
-		"vscode": "^1.1.37"
+		"vscode": "^1.1.37",
+		"jsdom": "16.5.3",
+		"jsdom-global": "3.0.2"
 	}
 }
