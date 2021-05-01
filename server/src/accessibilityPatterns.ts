@@ -11,7 +11,6 @@
 
 // Order based om most common types first
 import { DocumentColorRequest } from 'vscode-languageserver-protocol';
-import * as vscode from 'vscode'
 import 'jsdom-global/register';
 
 const fetch = require("node-fetch");

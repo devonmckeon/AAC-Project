@@ -1,11 +1,11 @@
 {
-	"name": "web-accessibility",
-	"displayName": "Web Accessibility",
+	"name": "aac-web-accessibility",
+	"displayName": "AAC Web Accessibility",
 	"description": "Audit Web Accessibility issues in Visual Studio Code",
-	"version": "0.2.84",
-	"publisher": "MaxvanderSchee",
-	"license": "MIT",
-	"repository": "https://github.com/mvdschee/web-accessibility",
+	"version": "1.0.0",
+	"publisher": "nbhatialin",
+	"license": "Tufts",
+	"repository": "https://github.com/devonmckeon/AAC-Project",
 	"icon": "a11y-icon.png",
 	"engines": {
 		"vscode": "^1.25.0"
@@ -68,7 +68,6 @@
 	"dependencies": {
 		"node-fetch": "^2.6.1",
 		"node-html-parser": "^3.1.3",
-		"vscode": "^1.1.37",
 		"vscode-languageserver": "^7.0.0"
 	}
 }
