@@ -183,10 +183,9 @@ export async function validateImg(m: RegExpExecArray) {
 
 	// Need to do further case handling for different ways images can be formatted,
 	// account for spacing etc
-	var imageUrl = imageline.substring(
-		imageline.lastIndexOf("src=") + 5, 
-		imageline.lastIndexOf("alt") - 2
-	);
+	let firstQuoteIndex = imageline.indexOf("\"") + 1;
+	let secondQuoteIndex = imageline.indexOf("\"", firstQuoteIndex);
+	var imageUrl = imageline.substring(firstQuoteIndex, secondQuoteIndex);
 	let serverUrl = 'https://aac-vscode-extension.ue.r.appspot.com/verify_image?imageUrl=' + imageUrl;
 	
 	try {
